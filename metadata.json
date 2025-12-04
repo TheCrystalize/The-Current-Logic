@@ -1,0 +1,5 @@
+{
+  "name": "The Current Logic",
+  "description": "An application demonstrating a Merkle DAG with dynamic scaling using BLAKE3 hashing principles. It showcases clustered tracing (Super-Nodes) and a pluggable persistence layer via IndexedDB.",
+  "requestFramePermissions": []
+}

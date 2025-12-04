@@ -1,0 +1,123 @@
+
+<div class="min-h-screen bg-base-900 text-gray-300 font-mono p-4 lg:p-8">
+  <main class="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left Column: Controls -->
+    <div class="lg:col-span-1 bg-base-800 rounded-lg shadow-lg p-6 flex flex-col gap-8 h-fit">
+      <header>
+        <h1 class="text-3xl font-bold text-white">The Current Logic</h1>
+        <p class="text-accent mt-1">Merkle-DAG Core Storage Layer</p>
+      </header>
+
+      <!-- System Controls -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 border-b border-base-700 pb-2 mb-4">System Controls</h2>
+        <div class="space-y-6">
+          <div>
+            <label for="autonomyMode" class="block text-sm font-medium text-gray-400 mb-2">Autonomy Mode</label>
+            <select id="autonomyMode" [value]="autonomyMode" (change)="autonomyMode = $event.target.value" class="w-full bg-base-700 border border-base-600 rounded-md px-3 py-2 text-white focus:ring-accent focus:border-accent">
+              <option value="STRICT">STRICT (Limit: 1)</option>
+              <option value="GUIDED">GUIDED (Limit: 10)</option>
+              <option value="FULL">FULL (Limit: 10-50)</option>
+            </select>
+          </div>
+          <div>
+            <label for="stress" class="block text-sm font-medium text-gray-400 mb-2">Current Stress: {{ currentStress.toFixed(2) }}</label>
+            <input id="stress" type="range" min="0" max="1" [value]="currentStress" (input)="currentStress = $event.target.valueAsNumber" step="0.01" class="w-full h-2 bg-base-600 rounded-lg appearance-none cursor-pointer accent-accent">
+          </div>
+        </div>
+      </section>
+
+      <!-- Buffer Status -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 border-b border-base-700 pb-2 mb-4">Super-Node Buffer</h2>
+        <div class="bg-base-900 rounded-md p-4 flex items-center justify-between">
+            <span class="text-gray-400">Operations Buffered:</span>
+            <span class="text-2xl font-bold text-accent">{{ dagService.bufferSize() }} / {{ dagService.clusterLimit() }}</span>
+        </div>
+        <div class="w-full bg-base-700 rounded-full h-2.5 mt-3">
+          <div class="bg-accent h-2.5 rounded-full" [style.width.%]="(dagService.bufferSize() / dagService.clusterLimit()) * 100"></div>
+        </div>
+      </section>
+
+      <!-- Add Operation -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 border-b border-base-700 pb-2 mb-4">Add Operation</h2>
+        <div class="flex flex-col gap-4">
+          <textarea [value]="newOperationPayload()" (input)="newOperationPayload.set($event.target.value)" rows="8" class="w-full bg-base-700 border border-base-600 rounded-md p-3 text-sm text-gray-200 focus:ring-accent focus:border-accent" placeholder="Enter operation payload as JSON..."></textarea>
+          @if(payloadError()) {
+            <p class="text-sm text-danger">{{ payloadError() }}</p>
+          }
+          <div class="flex gap-4">
+            <button (click)="addOperation()" class="flex-1 bg-accent hover:bg-accent-hover text-white font-bold py-2 px-4 rounded-md transition-colors">
+              Add Operation
+            </button>
+            <button (click)="forceFreeze()" [disabled]="dagService.bufferSize() === 0" class="flex-1 bg-base-600 hover:bg-base-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors">
+              Force Freeze
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: DAG Trace -->
+    <div class="lg:col-span-2 bg-base-800 rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-semibold text-white mb-6">Merkle-DAG Trace</h2>
+      <div class="space-y-8 relative">
+        @if (dagService.sortedNodes().length === 0) {
+          <div class="text-center text-gray-500 py-16">
+            <p>No nodes in the DAG.</p>
+            <p class="mt-2 text-sm">Add an operation to begin the trace.</p>
+          </div>
+        } @else {
+          @for (node of dagService.sortedNodes(); track node.hash; let i = $index) {
+            <div class="flex items-start gap-4">
+              <!-- Connector line -->
+              @if (i < dagService.sortedNodes().length - 1) {
+                <div class="absolute left-6 top-14 h-full border-l-2 border-dashed border-base-600"></div>
+              }
+              <div class="z-10 bg-base-800 h-12 flex items-center">
+                 <div class="w-12 h-12 rounded-full bg-base-700 flex items-center justify-center font-bold text-accent border-2 border-base-600">
+                    {{ dagService.sortedNodes().length - i }}
+                </div>
+              </div>
+
+              <!-- Node Content -->
+              <div class="flex-1 bg-base-700 rounded-lg p-4 border border-base-600">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="text-sm text-gray-400">HASH</p>
+                    <div class="flex items-center gap-2">
+                      <p class="font-semibold text-sm text-white truncate">{{ node.hash }}</p>
+                      <button (click)="copyToClipboard(node.hash)" class="text-gray-400 hover:text-white" title="Copy hash">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                      </button>
+                    </div>
+                  </div>
+                  @if (node.hash === dagService.headHash()) {
+                    <span class="bg-accent text-white text-xs font-bold px-2.5 py-1 rounded-full">HEAD</span>
+                  }
+                </div>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-400">PREV HASH</p>
+                  <div class="flex items-center gap-2">
+                    <p class="font-semibold text-sm text-gray-300 truncate">{{ node.prevHash || 'null (genesis)' }}</p>
+                    @if(node.prevHash) {
+                       <button (click)="copyToClipboard(node.prevHash)" class="text-gray-400 hover:text-white" title="Copy previous hash">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-base-600">
+                  <p class="text-sm text-gray-400 mb-2">OPERATIONS ({{ node.operations.length }})</p>
+                  <pre class="bg-base-900 text-xs text-gray-200 rounded p-3 max-h-48 overflow-auto"><code>{{ JSON.stringify(node.operations, null, 2) }}</code></pre>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </main>
+</div>

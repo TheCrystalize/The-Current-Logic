@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Current Logic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'base-900': '#0d1117',
+            'base-800': '#161b22',
+            'base-700': '#21262d',
+            'base-600': '#30363d',
+            'accent': '#2f81f7',
+            'accent-hover': '#58a6ff',
+            'success': '#238636',
+            'danger': '#da3633',
+          }
+        }
+      }
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "rxjs": "https://aistudiocdn.com/rxjs@^7.8.2?conditions=es2015",
+    "rxjs/operators": "https://aistudiocdn.com/rxjs@^7.8.2/operators?conditions=es2015",
+    "rxjs/ajax": "https://aistudiocdn.com/rxjs@^7.8.2/ajax?conditions=es2015",
+    "rxjs/webSocket": "https://aistudiocdn.com/rxjs@^7.8.2/webSocket?conditions=es2015",
+    "rxjs/testing": "https://aistudiocdn.com/rxjs@^7.8.2/testing?conditions=es2015",
+    "rxjs/fetch": "https://aistudiocdn.com/rxjs@^7.8.2/fetch?conditions=es2015",
+    "@angular/core": "https://next.esm.sh/@angular/core@^21.0.3?external=rxjs",
+    "@angular/compiler": "https://next.esm.sh/@angular/compiler@^21.0.3?external=rxjs",
+    "@angular/common/http": "https://next.esm.sh/@angular/common@^21.0.3/http?external=rxjs",
+    "@angular/platform-browser": "https://next.esm.sh/@angular/platform-browser@^21.0.3?external=rxjs"
+  }
+}
+</script>
+</head>
+<body class="bg-base-900 text-gray-300 font-sans">
+  <app-root></app-root>
+</body>
+</html>
+ 

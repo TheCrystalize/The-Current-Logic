@@ -1,0 +1,19 @@
+
+import '@angular/compiler';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import { provideZonelessChangeDetection } from '@angular/core';
+
+import { AppComponent } from './src/app.component';
+import { STORAGE_ADAPTER } from './src/services/persistence/storage-adapter.interface';
+import { IndexedDbAdapter } from './src/services/persistence/indexed-db.adapter';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideZonelessChangeDetection(),
+    provideHttpClient(),
+    { provide: STORAGE_ADAPTER, useClass: IndexedDbAdapter }
+  ],
+}).catch(err => console.error(err));
+
+// AI Studio always uses an `index.tsx` file for all project types.
